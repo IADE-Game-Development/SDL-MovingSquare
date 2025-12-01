@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <SDL3/SDL.h>
+#include <SDL3_image/SDL_image.h>
+#include "sdl_utils.h"
 
 #define APP_NAME "Space Counter"
 #define APP_WIDTH 800
@@ -7,6 +9,8 @@
 
 #define CUBE_WIDTH 100
 #define CUBE_HEIGHT 100
+
+#define MAX_SPEED 50
 
 static SDL_Window *window = NULL;
 static SDL_Renderer *renderer = NULL;
@@ -64,18 +68,20 @@ int main(void)
         if (x + CUBE_WIDTH > APP_WIDTH || x < 0)
         {
             velocity_x = -velocity_x;
-            if (velocity_x > 0)
+            counter++;
+            if (velocity_x > 0 && velocity_x < MAX_SPEED)
                 velocity_x++;
-            else
+            else if (velocity_x > -MAX_SPEED)
                 velocity_x--;
         }
 
         if (y + CUBE_HEIGHT > APP_HEIGHT || y < 0)
         {
             velocity_y = -velocity_y;
-            if (velocity_y > 0)
+            counter++;
+            if (velocity_y > 0 && velocity_y < MAX_SPEED)
                 velocity_y++;
-            else
+            else if (velocity_y > -MAX_SPEED)
                 velocity_y--;
         }
 
@@ -89,7 +95,8 @@ int main(void)
             {
                 if (event.key.key == SDLK_SPACE)
                 {
-                    counter++;
+                    // Reset the counter
+                    counter = 0;
                 }
             }
         }
@@ -108,7 +115,7 @@ int main(void)
             SDL_GetTicks() / 1000);
 
         SDL_RenderDebugTextFormat(renderer,
-        0, 0, "velocity_x = %d || velocity_y = %d", velocity_x, velocity_y);
+                                  0, 0, "velocity_x = %d || velocity_y = %d", velocity_x, velocity_y);
 
         SDL_RenderDebugTextFormat(renderer, 100, 100, "Counter: %d", counter);
 
