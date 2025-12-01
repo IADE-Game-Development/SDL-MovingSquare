@@ -1,11 +1,14 @@
 #include <stdio.h>
 #include <SDL3/SDL.h>
 
-#define APP_NAME   "Space Counter"
-#define APP_WIDTH  800
+#define APP_NAME "Space Counter"
+#define APP_WIDTH 800
 #define APP_HEIGHT 600
 
-static SDL_Window   *window   = NULL;
+#define CUBE_WIDTH 100
+#define CUBE_HEIGHT 100
+
+static SDL_Window *window = NULL;
 static SDL_Renderer *renderer = NULL;
 
 int main(void)
@@ -22,8 +25,7 @@ int main(void)
         APP_NAME,
         APP_WIDTH,
         APP_HEIGHT,
-        SDL_WINDOW_RESIZABLE
-    );
+        SDL_WINDOW_RESIZABLE);
 
     if (!window)
     {
@@ -46,9 +48,36 @@ int main(void)
     int running = 1;
     const Uint32 FRAME_MS = 16; // ~60 FPS
 
+    int x = 10;
+    int y = 10;
+
+    int velocity_x = 1;
+    int velocity_y = 1;
+
     while (running)
     {
         Uint32 frame_start = SDL_GetTicks();
+
+        x = x + velocity_x;
+        y = y + velocity_y;
+
+        if (x + CUBE_WIDTH > APP_WIDTH || x < 0)
+        {
+            velocity_x = -velocity_x;
+            if (velocity_x > 0)
+                velocity_x++;
+            else
+                velocity_x--;
+        }
+
+        if (y + CUBE_HEIGHT > APP_HEIGHT || y < 0)
+        {
+            velocity_y = -velocity_y;
+            if (velocity_y > 0)
+                velocity_y++;
+            else
+                velocity_y--;
+        }
 
         SDL_Event event;
         while (SDL_PollEvent(&event))
@@ -59,11 +88,12 @@ int main(void)
             if (event.type == SDL_EVENT_KEY_DOWN)
             {
                 if (event.key.key == SDLK_SPACE)
+                {
                     counter++;
+                }
             }
         }
 
-        
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE); // background (black)
         SDL_RenderClear(renderer);
 
@@ -75,14 +105,16 @@ int main(void)
             (float)((APP_WIDTH - (charsize * 46)) / 2),
             (APP_HEIGHT / 2),
             "(This program has been running for %" SDL_PRIu64 " seconds.)",
-            SDL_GetTicks() / 1000
-        );
+            SDL_GetTicks() / 1000);
+
+        SDL_RenderDebugTextFormat(renderer,
+        0, 0, "velocity_x = %d || velocity_y = %d", velocity_x, velocity_y);
 
         SDL_RenderDebugTextFormat(renderer, 100, 100, "Counter: %d", counter);
 
         // --- RED SQUARE ---
-        SDL_FRect rect = { 375, 500, 50, 50};
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
+        SDL_FRect rect = {x, y, CUBE_WIDTH, CUBE_HEIGHT};
+        SDL_SetRenderDrawColor(renderer, 0, 255, 0, SDL_ALPHA_OPAQUE);
         SDL_RenderFillRect(renderer, &rect);
 
         SDL_RenderPresent(renderer);
